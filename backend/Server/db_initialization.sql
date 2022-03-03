@@ -56,7 +56,7 @@ CREATE TABLE attraction_review_data (
     rating REAL DEFAULT 1,
     review_date TIMESTAMP DEFAULT NULL,
     labels TEXT DEFAULT NULL,
-    attraction_id INT REFERENCES restaurant_data
+    attraction_id INT REFERENCES attraction_data
 );
 
 \dt;

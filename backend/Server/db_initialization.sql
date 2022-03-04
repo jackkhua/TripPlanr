@@ -1,16 +1,16 @@
 CREATE DATABASE TripPlanr;
 
-
 CREATE TABLE user_information (
     user_id SERIAL PRIMARY KEY,
-    user_name VARCHAR (255) NOT NULL,
+    user_name VARCHAR (255) UNIQUE,
     created_dt TIMESTAMP DEFAULT NULL,
     last_login_dt TIMESTAMP DEFAULT NULL,
-    meta_data TEXT DEFAULT NULL
+    -- meta_data will be a json that stores questionnaire ans
+    meta_data JSONB DEFAULT NULL
 );
 
 CREATE TABLE login_credentials (
-    credential_id VARCHAR (255) PRIMARY KEY,
+    credential_id SERIAL PRIMARY KEY,
     credential_pswd VARCHAR (255) NOT NULL,
     user_id INT REFERENCES user_information
 );
@@ -28,7 +28,9 @@ CREATE TABLE attraction_data (
     rating REAL DEFAULT 1,
     location_code INT REFERENCES geographic_data,
     country VARCHAR (255) NOT NULL,
-    labels TEXT DEFAULT NULL
+    -- labels are json because they will be scored
+    labels JSONB DEFAULT NULL,
+    tags VARCHAR (255)[] DEFAULT NULL
 );
 
 CREATE TABLE restaurant_data (
@@ -57,6 +59,13 @@ CREATE TABLE attraction_review_data (
     review_date TIMESTAMP DEFAULT NULL,
     labels TEXT DEFAULT NULL,
     attraction_id INT REFERENCES attraction_data
+);
+
+CREATE TABLE trip_data (
+    trip_id SERIAL PRIMARY KEY,
+    -- schedule will be a json with dates as keys, and list of attraction_ids as value
+    schedule JSONB DEFAULT NULL,
+    user_id INT REFERENCES user_information
 );
 
 \dt;

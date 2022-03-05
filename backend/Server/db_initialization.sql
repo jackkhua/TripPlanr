@@ -30,7 +30,7 @@ CREATE TABLE attraction_data (
     country VARCHAR (255) NOT NULL,
     -- labels are json because they will be scored
     labels JSONB DEFAULT NULL,
-    tags VARCHAR (255)[] DEFAULT NULL
+    tags TEXT[] DEFAULT NULL
 );
 
 CREATE TABLE restaurant_data (
@@ -65,7 +65,8 @@ CREATE TABLE trip_data (
     trip_id SERIAL PRIMARY KEY,
     -- schedule will be a json with dates as keys, and list of attraction_ids as value
     schedule JSONB DEFAULT NULL,
-    user_id INT REFERENCES user_information
+    user_id INT REFERENCES user_information,
+    meta_data JSONB DEFAULT NULL
 );
 
 \dt;

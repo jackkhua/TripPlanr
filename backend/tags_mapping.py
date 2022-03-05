@@ -95,11 +95,7 @@ general_tags = {
     'Cultural Events': ['Cultural Events'],
     'Food & Drink': ['Other Food & Drink'],
 }
-total_tags = []
-input_tags = ['natural']
-for tag in input_tags:
-    total_tags = general_tags[tag].items()
-total_tags = set(total_tags)
+
 # import csv
 # tags_dict = set()
 # cities_lookup = ['London','New York City','Seoul','Singapore']

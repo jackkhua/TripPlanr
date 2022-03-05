@@ -1,6 +1,6 @@
 import pandas as pd
 import psycopg2
-
+from tags_mapping import general_tags
 connection = psycopg2.connect(user="postgres",
                                   password="tripplanr69",
                                   host="localhost",
@@ -32,19 +32,25 @@ for i in range(len(reviews)):
     for tag in tagsarr:
         tag = tag.strip()
         attraction_map[reviews[i][1]].add(tag)
+attraction_map2 = {
 
-print(attraction_map['Churchill War Rooms'])
 
+}
 for key, val in attraction_map.items():
-    print(key, val)
+    if key not in attraction_map2:
+        attraction_map2[key] = set()
+    for v in val:
+        for k1, v1 in general_tags.items():
+            if v in v1:
+                attraction_map2[key].add(k1)
+for key, val in attraction_map2.items():
     recordstr = '{'
     for item in val:
         recordstr = recordstr + '''"''' + item + '''",'''
-    recordstr = recordstr[:-1]
+    if (recordstr[-1] == ','):
+        recordstr = recordstr[:-1]
     recordstr = recordstr + '}'
-    print(recordstr)
     record_to_insert = (recordstr, key)
-    
     try:
         cursor.execute(query_text, record_to_insert)
         connection.commit()

@@ -43,6 +43,7 @@ class attraction_data(db.Model):
     labels = db.Column('labels', db.JSON)
     tags = db.Column('tags', db.ARRAY(db.Text))
     img = db.Column('img', db.Text)
+    source_url = db.Column('source_url', db.Text)
 
 class trip_data(db.Model):
     __tablename__ = "trip_data"
@@ -379,7 +380,8 @@ def attraction_get(attraction_id):
         'country': attraction.country,
         'labels': attraction.labels,
         'tags': attraction.tags,
-        'img': attraction.img
+        'img': attraction.img,
+        'source_url': attraction.source_url
     }
 
 
@@ -398,7 +400,8 @@ def location_attractions_get(location_code):
             'country': attraction.country,
             'labels': attraction.labels,
             'tags': attraction.tags,
-            'img': attraction.img
+            'img': attraction.img,
+            'source_url': attraction.source_url
         }
     return attractions_dict
 

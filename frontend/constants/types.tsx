@@ -36,7 +36,7 @@ export type Restaurant = {
   source_site_id: number;
 };
 
-export type Trip = {
+export type TripObj = {
   id: string;
   schedule: Object;
   user_id: string;

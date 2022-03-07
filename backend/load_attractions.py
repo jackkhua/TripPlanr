@@ -24,7 +24,7 @@ for i in range(len(reviews)):
     if city != "London" and city != "Singapore" and city != "Seoul" and city != "New York City":
         continue
     country = cityset[city]
-    record_to_insert = (reviews[i][1], 1, cityset[city][0], cityset[city][1])
+    record_to_insert = (reviews[i][1], reviews[i][10], cityset[city][0], cityset[city][1])
     try:
         cursor.execute(query_text, record_to_insert)
         connection.commit()

@@ -32,6 +32,8 @@ CREATE TABLE attraction_data (
     labels JSONB DEFAULT NULL,
     tags TEXT[] DEFAULT NULL,
     img TEXT DEFAULT NULL
+    img TEXT DEFAULT NULL,
+    source_url TEXT DEFAULT NULL
 );
 
 CREATE TABLE restaurant_data (

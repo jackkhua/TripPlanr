@@ -2,7 +2,7 @@ from flask import Flask
 from flask import request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 import hashlib
 import uuid
 
@@ -132,12 +132,101 @@ def users_update_responses(user_id):
             "no meta data", 400
     return "Must be patch"
 
-@app.route("/users/<user_id>/location/<location_code>/generate_itinerary", methods = ['GET'])
-def users_generate_itinerary(user_id, location_code):
-    if request.method == 'GET':
-        print ("GET")
-    return
+@app.route("/users/<user_id>/location/<location_code>/generate_itinerary/<trip_id>", methods = ['GET'])
+def users_generate_itinerary(user_id, location_code, trip_id):
+    user = user_information.query.filter_by(user_id = user_id).first()
+    if user == None:
+        return "User not found", 400
+        
+    result = {}
+    trip = trip_data.query.filter_by(trip_id = trip_id).first()
+    meta_data = trip.meta_data
+    tags = {"Nature", "Sightseeing", "Theaters", "Museum & Gallery", "Sports & Activities", "Shopping", "Alcohol", "Casinos", "Zoos", "Aquariums", "Amusement & Theme Parks", "Cultural Events", "Food & Drink"}
+    trip_tags = []
+    trip_labels = []
+    for key, val in meta_data.items():
+        if key in tags and val == True:
+            trip_tags.append(key)
+        elif val == True:
+            trip_labels.append(key)
 
+
+    start = request.json["start_date"]
+    end = request.json["end_date"]
+    startdate = datetime.strptime(start, "%m%d%Y").date()
+    enddate = datetime.strptime(end, "%m%d%Y").date()
+    timediff = (enddate - startdate).days + 1
+    curr = startdate
+    for i in range(timediff):
+        result[str(curr)] = []
+        curr = curr + timedelta(days=1)
+    result["Other"] = []
+    MAX_ATTRACTIONS_PER_DAY = 5
+    max_attractions_per_tag = MAX_ATTRACTIONS_PER_DAY * max(1, timediff // len(trip_tags))
+    attractions = attraction_data.query.filter_by(location_code = location_code)
+    curr = startdate
+    count = 0
+    for tag in trip_tags:
+        tag_attractions = []
+        for attraction in attractions:
+            if tag in attraction.tags and attraction.labels != None:
+                tag_attractions.append(attraction)
+        attractions_per_label = max_attractions_per_tag // len(trip_labels)
+        remainder = max_attractions_per_tag - len(trip_labels) * attractions_per_label
+        day_attraction_num = attractions_per_label // 2
+        if attractions_per_label % 2 == 1:
+            day_attraction_num += 1
+        for label in trip_labels:
+            tag_attractions = sorted(tag_attractions, key=lambda d: 0.0 if label not in d.labels else d.labels[label])
+            for i in range(day_attraction_num):
+                result[str(curr)].append({
+                    'attraction_id': tag_attractions[i].attraction_id,
+                    'attraction_name': tag_attractions[i].attraction_name,
+                    'rating': tag_attractions[i].rating,
+                    'location_code': tag_attractions[i].location_code,
+                    'country': tag_attractions[i].country,
+                    'labels': tag_attractions[i].labels,
+                    'tags': tag_attractions[i].tags
+                })
+                curr = curr + timedelta(days=1)
+                if curr > enddate:
+                    curr = startdate
+            for i in range(day_attraction_num // 2):
+                result["Other"].append({
+                    'attraction_id': tag_attractions[i].attraction_id,
+                    'attraction_name': tag_attractions[i].attraction_name,
+                    'rating': tag_attractions[i].rating,
+                    'location_code': tag_attractions[i].location_code,
+                    'country': tag_attractions[i].country,
+                    'labels': tag_attractions[i].labels,
+                    'tags': tag_attractions[i].tags
+                })
+
+            if remainder > 0:
+                result["Other"].append(
+                    {
+                    'attraction_id': tag_attractions[attractions_per_label].attraction_id,
+                    'attraction_name': tag_attractions[attractions_per_label].attraction_name,
+                    'rating': tag_attractions[attractions_per_label].rating,
+                    'location_code': tag_attractions[attractions_per_label].location_code,
+                    'country': tag_attractions[attractions_per_label].country,
+                    'labels': tag_attractions[attractions_per_label].labels,
+                    'tags':tag_attractions[attractions_per_label].tags
+                })
+                curr = curr + timedelta(days=1)
+                if curr > enddate:
+                    curr = startdate
+                #count += 1
+    
+    return str(result)
+
+        
+        
+
+        # sort attractions by label then return highest (attractions_per_label) 
+
+
+    
 @app.route("/users/<user_id>/trip", methods = ['POST'])
 def create_trip(user_id):
     user = user_information.query.filter_by(user_id = user_id).first()
@@ -148,8 +237,7 @@ def create_trip(user_id):
             trip = trip_data(schedule={}, user_id = int(user_id), meta_data=request.json["meta_data"])
             db.session.add(trip)
             db.session.commit()
-            return {
-                'trip_id': trip.trip_id,
+            return {                                                                                                                                                                    
                 'schedule': trip.schedule,
                 'user_id': trip.user_id,
                 'meta_data': trip.meta_data

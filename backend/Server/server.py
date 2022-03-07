@@ -1,5 +1,6 @@
 from flask import Flask
 from flask import request, jsonify
+from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 import json
 from datetime import datetime, timedelta
@@ -7,6 +8,7 @@ import hashlib
 import uuid
 
 app = Flask(__name__)
+CORS(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:tripplanr69@localhost/postgres'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy()
@@ -287,7 +289,7 @@ def trip(user_id, trip_id):
             }
     return "Error", 400
 
-@app.route("/authenticate", methods = ['GET'])
+@app.route("/authenticate", methods = ['POST'])
 def authenticate():
     user = user_information.query.filter_by(user_name = request.json["user_name"]).first()
     user_id = user.user_id

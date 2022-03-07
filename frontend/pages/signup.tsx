@@ -30,6 +30,7 @@ const Signup: NextPage = () => {
     const body = {
       user_name: values.email,
       password: values.password,
+      meta_data: '',
     };
     const url = process.env.SERVER_URL || 'http://localhost:8080/users';
     const req = await fetch(url, {

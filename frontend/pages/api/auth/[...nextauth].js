@@ -30,10 +30,11 @@ export default NextAuth({
           body: JSON.stringify(credentials),
           headers: { 'Content-Type': 'application/json' },
         });
-
+        console.log('STATUS: ', res.status);
         const user = await res.json();
 
         if (res.ok && user) {
+          console.log(JSON.stringify(user));
           return user;
         }
 
@@ -54,6 +55,23 @@ export default NextAuth({
       // Persist the OAuth access_token to the token right after signin
       if (account) {
         token.accessToken = account.access_token;
+        const url = 'http://localhost:8080/users';
+        const body = {
+          user_name: token.email,
+          password: account.access_token,
+          meta_data: '',
+        };
+        const req = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+
+        if (req.status === 500) {
+          console.log(`Account with email ${token.email} already exists`);
+        } else if (req.status === 200) {
+          console.log(`Account with email ${token.email} created`);
+        }
       }
       if (user) {
         token.user = user;
@@ -64,7 +82,6 @@ export default NextAuth({
       // Send properties to the client, like an access_token from a provider.
       session.accessToken = token.accessToken;
       session.user = token.user;
-      console.log('SESSION', JSON.stringify(session));
 
       return session;
     },

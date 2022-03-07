@@ -4,6 +4,10 @@ import GoogleProvider from 'next-auth/providers/google';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
 export default NextAuth({
+  theme: {
+    colorScheme: 'light',
+    brandColor: '#2590EB',
+  },
   providers: [
     CredentialsProvider({
       name: 'Email',
@@ -36,6 +40,7 @@ export default NextAuth({
         const user = {
           user_id: 1,
           user_name: 'John Smith',
+          email: 'example@example.com',
         };
         return user;
       },
@@ -50,17 +55,22 @@ export default NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, account }) {
+    async jwt({ token, account, user }) {
       // Persist the OAuth access_token to the token right after signin
       if (account) {
         token.accessToken = account.access_token;
+      }
+      if (user) {
+        token.user = user;
       }
       return token;
     },
     async session({ session, token, user }) {
       // Send properties to the client, like an access_token from a provider.
       session.accessToken = token.accessToken;
-      session.user = user;
+      session.user = token.user;
+      console.log('SESSION', JSON.stringify(session));
+
       return session;
     },
   },

@@ -13,7 +13,7 @@ const Button: React.FC<ButtonProps & ButtonHTMLAttributes<HTMLButtonElement>> = 
 }) => {
   return (
     <button
-      className={`rounded-md border-2 border-transparent py-2 px-4 ${
+      className={`m-2 rounded-md border-2 border-transparent py-2 px-4 ${
         small ? 'text-sm' : 'text-md'
       } bg-black text-white hover:border-black hover:bg-white hover:text-black`}
       {...props}

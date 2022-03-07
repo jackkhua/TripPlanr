@@ -30,7 +30,8 @@ CREATE TABLE attraction_data (
     country VARCHAR (255) NOT NULL,
     -- labels are json because they will be scored
     labels JSONB DEFAULT NULL,
-    tags TEXT[] DEFAULT NULL
+    tags TEXT[] DEFAULT NULL,
+    image TEXT DEFAULT NULL
 );
 
 CREATE TABLE restaurant_data (

@@ -26,14 +26,24 @@ const Signup: NextPage = () => {
   const formErrors = formMethods.formState.errors;
   const router = useRouter();
 
-  const onSubmit: SubmitHandler<SignupFormValues> = (values) => {
-    const email = values.email;
-    const password = values.password;
+  const onSubmit: SubmitHandler<SignupFormValues> = async (values) => {
+    const body = {
+      user_name: values.email,
+      password: values.password,
+    };
+    const url = process.env.SERVER_URL || 'http://localhost:8080/users';
+    const req = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
 
-    // TODO: MAKE API CALL
-    console.log(`Sending email = ${email} and password = ${password}`);
-
-    router.push('/api/auth/signin');
+    if (req.status === 500) {
+      alert(`Account with email ${values.email} already exists`);
+    } else if (req.status === 200) {
+      alert(`Account created!`);
+      router.push('/api/auth/signin');
+    }
   };
 
   return (

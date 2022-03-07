@@ -12,7 +12,7 @@ export default NextAuth({
     CredentialsProvider({
       name: 'Email',
       credentials: {
-        email: {
+        user_name: {
           label: 'E-mail',
           type: 'text',
           placeholder: 'example@example.com',
@@ -24,25 +24,20 @@ export default NextAuth({
       },
       async authorize(credentials) {
         console.log('Attempting to authenticate with credentials', JSON.stringify(credentials));
-        // const res = await fetch('/authenticate', {
-        //   method: 'GET',
-        //   body: JSON.stringify(credentials),
-        //   headers: { 'Content-Type': 'application/json' },
-        // });
+        const url = 'http://localhost:8080/authenticate';
+        const res = await fetch(url, {
+          method: 'POST',
+          body: JSON.stringify(credentials),
+          headers: { 'Content-Type': 'application/json' },
+        });
 
-        // const user = await res.json();
+        const user = await res.json();
 
-        // if (res.ok && user) {
-        //   return user;
-        // }
+        if (res.ok && user) {
+          return user;
+        }
 
-        // return null;
-        const user = {
-          user_id: 1,
-          user_name: 'John Smith',
-          email: 'example@example.com',
-        };
-        return user;
+        return null;
       },
     }),
     FacebookProvider({

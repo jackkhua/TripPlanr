@@ -47,6 +47,7 @@ class attraction_data(db.Model):
 class trip_data(db.Model):
     __tablename__ = "trip_data"
     trip_id = db.Column('trip_id', db.Integer, primary_key = True)
+    location_code = db.Column('location_code', db.Integer, db.ForeignKey('geographic_data.location_code'))
     # schedule will be a json with dates as keys, and list of attraction_ids as value
     schedule = db.Column('schedule', db.JSON)
     user_id = db.Column('user_id', db.Integer, db.ForeignKey('user_information.user_id'))
@@ -238,7 +239,9 @@ def create_trip(user_id):
             trip = trip_data(schedule={}, user_id = int(user_id), meta_data=request.json["meta_data"])
             db.session.add(trip)
             db.session.commit()
-            return {                                                                                                                                                                    
+            return {                 
+                'trip_id': trip.trip_id,   
+                'location_code': trip.location_code,                                                                                                                                              
                 'schedule': trip.schedule,
                 'user_id': trip.user_id,
                 'meta_data': trip.meta_data
@@ -257,6 +260,7 @@ def trip(user_id, trip_id):
         if trip.user_id == int(user_id):
             return {
                 'trip_id': trip.trip_id,
+                'location_code': trip.location_code,
                 'schedule': trip.schedule,
                 'user_id': trip.user_id,
                 'meta_data': trip.meta_data
@@ -275,6 +279,7 @@ def trip(user_id, trip_id):
             db.session.commit()
             return {
                 'trip_id': trip.trip_id,
+                'location_code': trip.location_code,
                 'schedule': trip.schedule,
                 'user_id': trip.user_id,
                 'meta_data': trip.meta_data

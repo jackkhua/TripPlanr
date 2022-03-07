@@ -31,7 +31,7 @@ CREATE TABLE attraction_data (
     -- labels are json because they will be scored
     labels JSONB DEFAULT NULL,
     tags TEXT[] DEFAULT NULL,
-    image TEXT DEFAULT NULL
+    img TEXT DEFAULT NULL
 );
 
 CREATE TABLE restaurant_data (

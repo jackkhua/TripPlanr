@@ -64,6 +64,7 @@ CREATE TABLE attraction_review_data (
 
 CREATE TABLE trip_data (
     trip_id SERIAL PRIMARY KEY,
+    location_code INT REFERENCES geographic_data,
     -- schedule will be a json with dates as keys, and list of attraction_ids as value
     schedule JSONB DEFAULT NULL,
     user_id INT REFERENCES user_information,

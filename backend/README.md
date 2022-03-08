@@ -1,7 +1,11 @@
 Step 1: Start up psql and connect using default values:
+
 Server: localhost
+
 Database: postgres
+
 Port: 5432
+
 Username: postgres
 
 And set the password to tripplanr69

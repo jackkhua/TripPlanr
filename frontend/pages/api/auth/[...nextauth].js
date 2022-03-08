@@ -69,10 +69,13 @@ export default NextAuth({
           body: JSON.stringify(body),
         });
 
+        const res = await req.json();
         if (req.status === 500) {
           console.log(`Account with email ${token.email} already exists`);
         } else if (req.status === 200) {
           console.log(`Account with email ${token.email} created`);
+          console.log(JSON.stringify(res));
+          token.user_id = res.user_id;
         } else {
           console.log(`jwt POST to /users returned with ${JSON.stringify(req.json())}`);
         }
@@ -85,8 +88,9 @@ export default NextAuth({
     async session({ session, token, user }) {
       // Send properties to the client, like an access_token from a provider.
       session.accessToken = token.accessToken;
+      session.user_id = token.user_id;
       session.user = token.user;
-
+      console.log('SESSION', JSON.stringify(session));
       return session;
     },
   },

@@ -137,7 +137,7 @@ def users_update_responses(user_id):
             "no meta data", 400
     return "Must be patch"
 
-@app.route("/users/<user_id>/location/<location_code>/generate_itinerary/<trip_id>", methods = ['GET'])
+@app.route("/users/<user_id>/location/<location_code>/generate_itinerary/<trip_id>", methods = ['POST'])
 def users_generate_itinerary(user_id, location_code, trip_id):
     user = user_information.query.filter_by(user_id = user_id).first()
     if user == None:
@@ -158,8 +158,8 @@ def users_generate_itinerary(user_id, location_code, trip_id):
 
     start = request.json["start_date"]
     end = request.json["end_date"]
-    startdate = datetime.strptime(start, "%m%d%Y").date()
-    enddate = datetime.strptime(end, "%m%d%Y").date()
+    startdate = datetime.fromisoformat(start).date()
+    enddate = datetime.fromisoformat(end).date()
     timediff = (enddate - startdate).days + 1
     curr = startdate
     for i in range(timediff):
@@ -238,8 +238,10 @@ def create_trip(user_id):
     if request.method == 'POST':
         if user == None:
             return "User not found", 400
+        if "location_code" in request.json:
+            location_code = request.json["location_code"]
         if "meta_data" in request.json:
-            trip = trip_data(schedule={}, user_id = int(user_id), meta_data=request.json["meta_data"])
+            trip = trip_data(schedule={}, user_id = int(user_id), location_code=location_code, meta_data=request.json["meta_data"])
             db.session.add(trip)
             db.session.commit()
             return {                 
@@ -325,7 +327,7 @@ def location_get(location_code):
 
 @app.route("/location", methods = ['GET'])
 def location_get_by_name():
-    location = geographic_data.query.filter_by(location = request.json["location"]).first()
+    location = geographic_data.query.filter_by(location = request.args.get('location')).first()
     if location == None:
         return "Location not found", 400
     return {

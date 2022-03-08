@@ -13,8 +13,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 
 const travel_locations = [
-  { value: 'New York', label: 'New York' },
-  { value: 'Tokyo', label: 'Tokyo' },
+  { value: 'New York City', label: 'New York' },
   { value: 'Seoul', label: 'Seoul' },
   { value: 'London', label: 'London' },
   { value: 'Singapore', label: 'Singapore' },
@@ -37,30 +36,34 @@ const event_options = [
 ];
 
 const budget_options = [
-  { value: 'high', label: 'A lot' },
+  { value: 'expensive', label: 'A lot' },
   { value: 'moderate', label: 'A moderate amount' },
-  { value: 'low', label: 'A low amount' },
+  { value: 'cheap', label: 'A low amount' },
 ];
 
 const local_options = [
-  { value: 'yes', label: 'Yes' },
-  { value: 'no', label: 'No' },
+  { value: 'social', label: 'Yes' },
+  { value: 'non_social', label: 'No' },
 ];
 
 const activity_options = [
-  { value: 'nature', label: 'Nature' },
-  { value: 'sightseeing', label: 'Sightseeing' },
-  { value: 'museums_galleries', label: 'Museums and Galleries' },
-  { value: 'sports_activities', label: 'Sports and Physical Activities' },
-  { value: 'shopping', label: 'Shopping' },
-  { value: 'alcohol', label: 'Bars and Alcohol' },
-  { value: 'casinos', label: 'Casinos and Gambling' },
-  { value: 'zoos', label: 'Zoos and Animal Parks' },
-  { value: 'aquariums', label: 'Aquariums and Sea Exhibits' },
-  { value: 'amusement_parks', label: 'Amusement and Theme Parks' },
-  { value: 'cultural_events', label: 'Cultural Events' },
+  { value: 'Nature', label: 'Nature' },
+  { value: 'Sightseeing', label: 'Sightseeing' },
+  { value: 'Museum & Gallery', label: 'Museums and Galleries' },
+  { value: 'Theaters', label: 'Theatres' },
+  { value: 'Sports & Activities', label: 'Sports and Physical Activities' },
+  { value: 'Shopping', label: 'Shopping' },
+  { value: 'Alcohol', label: 'Bars and Alcohol' },
+  { value: 'Casinos', label: 'Casinos and Gambling' },
+  { value: 'Zoos', label: 'Zoos and Animal Parks' },
+  { value: 'Aquariums', label: 'Aquariums and Sea Exhibits' },
+  { value: 'Amusement & Theme Parks', label: 'Amusement and Theme Parks' },
+  { value: 'Cultural Events', label: 'Cultural Events' },
 ];
-
+type ActivityObj = {
+  value: string;
+  label: string;
+};
 type OnboardingValues = {
   travel_location: string;
   start_date: string;
@@ -70,22 +73,84 @@ type OnboardingValues = {
   event_option: string;
   budget_option: string;
   local_option: string;
-  activity_options: string[];
+  activity_options: ActivityObj[];
 };
 
-const Trips: NextPage = () => {
+const Questions: NextPage = () => {
   const { data } = useSession();
   const router = useRouter();
+  const { update_id } = router.query;
   const [startedFlow, setStartedFlow] = useState(false);
 
   const formMethods = useForm<OnboardingValues>();
   const formErrors = formMethods.formState.errors;
 
-  const onSubmit: SubmitHandler<OnboardingValues> = (values) => {
-    console.log(`Received values: ${JSON.stringify(values)}`);
+  const onSubmit: SubmitHandler<OnboardingValues> = async (values) => {
+    const user_id = data.user_id;
+    const location_url = `${process.env.SERVER_URL || 'http://localhost:8080'}/location/all`;
+    console.log(location_url);
+    const location_req = await fetch(location_url);
+    const location_data = await location_req.json();
+
+    const location_code = location_data[values.travel_location].location_code;
+    const trip_labels = values.activity_options.map((item) => item.value);
+    const meta_data = {
+      [values.travel_option]: true,
+      [values.attraction_option]: true,
+      [values.event_option]: true,
+      [values.budget_option]: true,
+      [values.local_option]: true,
+    };
+    for (const label of trip_labels) {
+      Object.assign(meta_data, { [label]: true });
+    }
+    const body = {
+      meta_data: meta_data,
+      location_code: location_code,
+    };
+    console.log('BODY', JSON.stringify(body));
+    let trip_resp;
+    if (update_id) {
+      const update_trip_url = `${process.env.SERVER_URL || 'http://localhost:8080'}/users/${user_id}/trip/${trip_id}`;
+      const trip_req = await fetch(update_trip_url, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+
+      trip_resp = await trip_req.json();
+    } else {
+      const trip_url = `${process.env.SERVER_URL || 'http://localhost:8080'}/users/${user_id}/trip`;
+      const trip_req = await fetch(trip_url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+
+      trip_resp = await trip_req.json();
+    }
+    const trip_id = trip_resp.trip_id;
+    const generate_itinerary_url = `${
+      process.env.SERVER_URL || 'http://localhost:8080'
+    }/users/${user_id}/location/${location_code}/generate_itinerary/${trip_id}`;
+    const itinerary_body = {
+      start_date: values.start_date,
+      end_date: values.end_date,
+    };
+    console.log(JSON.stringify(itinerary_body));
+    const generate_itinerary_req = await fetch(generate_itinerary_url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(itinerary_body),
+    });
+
+    const itinerary_data = await generate_itinerary_req.json();
+    const itin_text = await generate_itinerary_req.text();
+    console.log(itinerary_data);
+    console.log(itin_text);
     alert('Your trip has been created!');
 
-    router.push('/trips');
+    // router.push('/trips');
   };
 
   if (data) {
@@ -335,6 +400,6 @@ const Trips: NextPage = () => {
   );
 };
 
-export default Trips;
+export default Questions;
 
 /* Styles */

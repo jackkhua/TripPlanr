@@ -176,6 +176,8 @@ def users_generate_itinerary(user_id, location_code, trip_id):
         for attraction in attractions:
             if tag in attraction.tags and attraction.labels != None:
                 tag_attractions.append(attraction)
+        if len(tag_attractions) == 0:
+            continue
         attractions_per_label = max_attractions_per_tag // len(trip_labels)
         remainder = max_attractions_per_tag - len(trip_labels) * attractions_per_label
         day_attraction_num = attractions_per_label // 2

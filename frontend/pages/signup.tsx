@@ -11,6 +11,8 @@ import Footer from '../components/Footer';
 import { NavLink } from '../constants/types';
 import Header from '../components/Header';
 
+import { useSession, signIn, signOut } from 'next-auth/react';
+
 const navs: NavLink[] = [
   { name: 'Sign Up', path: '/signup' },
   { name: 'Login', path: '/api/auth/signin' },
@@ -43,7 +45,7 @@ const Signup: NextPage = () => {
       alert(`Account with email ${values.email} already exists`);
     } else if (req.status === 200) {
       alert(`Account created!`);
-      router.push('/api/auth/signin');
+      signIn(undefined, { callbackUrl: '/trips' });
     }
   };
 

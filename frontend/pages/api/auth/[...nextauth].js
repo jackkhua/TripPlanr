@@ -8,6 +8,7 @@ export default NextAuth({
     colorScheme: 'light',
     brandColor: '#2590EB',
   },
+
   providers: [
     CredentialsProvider({
       name: 'Email',
@@ -23,19 +24,19 @@ export default NextAuth({
         },
       },
       async authorize(credentials) {
-        console.log('Attempting to authenticate with credentials', JSON.stringify(credentials));
         const url = 'http://localhost:8080/authenticate';
         const res = await fetch(url, {
           method: 'POST',
           body: JSON.stringify(credentials),
           headers: { 'Content-Type': 'application/json' },
         });
-        console.log('STATUS: ', res.status);
         const user = await res.json();
 
-        if (res.ok && user) {
+        if (res.ok) {
           console.log(JSON.stringify(user));
           return user;
+        } else {
+          console.log(`Authorize req failed with status ${res.status}, ${res.text()}`);
         }
 
         return null;
@@ -53,12 +54,13 @@ export default NextAuth({
   callbacks: {
     async jwt({ token, account, user }) {
       // Persist the OAuth access_token to the token right after signin
-      if (account) {
-        token.accessToken = account.access_token;
+      if (account && account.access_token) {
+        const access_token = account.access_token;
+        token.accessToken = access_token;
         const url = 'http://localhost:8080/users';
         const body = {
           user_name: token.email,
-          password: account.access_token,
+          password: access_token,
           meta_data: '',
         };
         const req = await fetch(url, {
@@ -71,6 +73,8 @@ export default NextAuth({
           console.log(`Account with email ${token.email} already exists`);
         } else if (req.status === 200) {
           console.log(`Account with email ${token.email} created`);
+        } else {
+          console.log(`jwt POST to /users returned with ${JSON.stringify(req.json())}`);
         }
       }
       if (user) {

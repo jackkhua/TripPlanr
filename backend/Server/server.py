@@ -309,7 +309,7 @@ def authenticate():
             'last_login_dt': user.last_login_dt,
             'meta_data': user.meta_data
         }
-    return "Could not authenticate, invalid."
+    return "Could not authenticate, invalid.", 400
 
 @app.route("/location/<location_code>", methods = ['GET'])
 def location_get(location_code):

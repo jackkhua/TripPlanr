@@ -21,15 +21,35 @@ const Home: NextPage = () => {
           Welcome to <span className="text-blue-600">TripPlanr!</span>
         </h1>
         <h2 className="m-5 text-4xl">The All-In-One Smart Trip Planning Platform</h2>
-
-        <p className="m-5 text-2xl">Get started by signing up or logging in below.</p>
+        {status === 'authenticated' ? (
+          <p className="m-5 text-2xl">Thanks for logging in! View your trips or create a new one below.</p>
+        ) : (
+          <p className="m-5 text-2xl">Get started by signing up or logging in below.</p>
+        )}
         <div className="flex-row">
-          <Link href="/signup">
-            <Button buttonText="Sign Up"></Button>
-          </Link>
-          <Link href="/api/auth/signin">
-            <Button buttonText="Log In"></Button>
-          </Link>
+          {status === 'authenticated' ? (
+            <>
+              <Link href="/trips">
+                <Button buttonText="My Trips"></Button>
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link href="/signup">
+                <Button buttonText="Sign Up"></Button>
+              </Link>
+            </>
+          )}
+
+          {status === 'authenticated' ? (
+            <>
+              <Link href="/onboard">
+                <Button buttonText="New Trip"></Button>
+              </Link>
+            </>
+          ) : (
+            <Button buttonText="Log In" onClick={() => signIn(undefined, { callbackUrl: '/trips' })} />
+          )}
         </div>
       </div>
       <Footer />

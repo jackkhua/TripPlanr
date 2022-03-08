@@ -62,7 +62,6 @@ const activity_options = [
 ];
 
 type OnboardingValues = {
-  age: number;
   travel_location: string;
   start_date: string;
   end_date: string;
@@ -92,42 +91,31 @@ const Trips: NextPage = () => {
   if (data) {
     if (!startedFlow) {
       return (
-        <div className="w-full flex-col">
-          <Header navs={loggedInNavs} />
-          <div className="m-8	w-1/2 content-center">
-            <h1 className="text-2xl">
-              Thanks for choosing TripPlanr! Before we get started, we want to learn more about you so we can plan the
-              perfect trip.
-            </h1>
-            <Button buttonText="Get Started" onClick={() => setStartedFlow(true)} />
+        <>
+          <div className="h-[85vh] w-screen flex-col">
+            <Header navs={loggedInNavs} />
+            <div className="m-auto grid h-1/2	w-1/2 place-items-center">
+              <h1 className="align-center mt-10 text-center text-2xl">
+                Thanks for choosing TripPlanr! Before we get started, we want to learn more about you so we can plan the
+                perfect trip.
+              </h1>
+              <div className="mb-4 justify-self-center">
+                <Button buttonText="Get Started" onClick={() => setStartedFlow(true)} />
+              </div>
+            </div>
           </div>
           <Footer />
-        </div>
+        </>
       );
     } else {
       return (
-        <div className="w-full flex-col">
+        <div className="h-full w-full flex-col">
           <Header navs={loggedInNavs} />
-          <div className="m-8">
+          <div className="m-auto grid place-items-center">
             <FormProvider {...formMethods}>
               <form className="mt-12 w-1/2" onSubmit={formMethods.handleSubmit(onSubmit)}>
                 <div className="flex flex-col space-x-5 space-y-5">
-                  <label className="ml-5">What is your age?</label>
-                  <Input
-                    type="number"
-                    formFieldName="age"
-                    placeholder="25"
-                    autoComplete="off"
-                    errorState={Boolean(formErrors.age)}
-                    formRegisterOptions={{
-                      required: {
-                        value: true,
-                        message: 'Please enter your age.',
-                      },
-                    }}
-                    {...formMethods.register('age')}
-                  />
-                  <label>Where are you travelling?</label>
+                  <label className="ml-5">Where are you travelling?</label>
                   <Controller
                     control={formMethods.control}
                     name="travel_location"
@@ -324,7 +312,9 @@ const Trips: NextPage = () => {
                       />
                     )}
                   />
-                  <Button buttonText="Submit" />
+                  <div className="grid place-items-center">
+                    <Button buttonText="Submit" />
+                  </div>
                 </div>
               </form>
             </FormProvider>

@@ -1,3 +1,4 @@
+from sqlite3 import IntegrityError
 from flask import Flask
 from flask import request, jsonify
 from flask_cors import CORS
@@ -63,29 +64,33 @@ def users_create():
     
         
     if request.method == 'POST':
-        if "user_name" in request.json and "password" in request.json:
-            user = user_information(user_name=request.json["user_name"], created_dt=db.func.now(), last_login_dt=db.func.now(), meta_data=request.json["meta_data"])
-            
-            db.session.add(user)
-            
-            db.session.commit()
-            salt = uuid.uuid4().hex
-            credentials = login_credentials(credential_pswd=hashlib.sha256(salt.encode() + request.json["password"].encode()).hexdigest() + ':' + salt, user_id=user.user_id)
-            db.session.add(credentials)
-            
-            db.session.commit()
-            return {
-            'user_id': user.user_id,
-            'user_name': user.user_name,
-            'created_dt': user.created_dt,
-            'last_login_dt': user.last_login_dt,
-            'meta_data': user.meta_data
-            
-            }
+        try:
+            if "user_name" in request.json and "password" in request.json:
+                user = user_information(user_name=request.json["user_name"], created_dt=db.func.now(), last_login_dt=db.func.now(), meta_data=request.json["meta_data"])
+                
+                db.session.add(user)
+                
+                db.session.commit()
+                salt = uuid.uuid4().hex
+                credentials = login_credentials(credential_pswd=hashlib.sha256(salt.encode() + request.json["password"].encode()).hexdigest() + ':' + salt, user_id=user.user_id)
+                db.session.add(credentials)
+                
+                db.session.commit()
+                return {
+                'user_id': user.user_id,
+                'user_name': user.user_name,
+                'created_dt': user.created_dt,
+                'last_login_dt': user.last_login_dt,
+                'meta_data': user.meta_data
+                
+                }
+        except IntegrityError:
+            return "Account already exists", 500
         else:
             return "User name and password must be provided.", 400
 
     return 400
+
 @app.route("/users/<user_id>", methods = ['GET', 'DELETE'])
 def users(user_id):
     if request.method == 'GET':
@@ -225,7 +230,7 @@ def users_generate_itinerary(user_id, location_code, trip_id):
                     curr = startdate
                 #count += 1
     
-    return str(result)
+    return json.dumps(result)
 
         
         
@@ -254,6 +259,25 @@ def create_trip(user_id):
                 'meta_data': trip.meta_data
             }
     return "Error", 400
+
+@app.route("/users/<user_id>/trips", methods = ['GET'])
+def get_trips(user_id):
+    user = user_information.query.filter_by(user_id = user_id).first()
+    if user == None:
+        return "User not found", 404
+    trips = trip_data.query.filter_by(user_id = user_id).all()
+    print(trips)
+    if len(trips) == 0:
+        return {
+            trips: []
+        }, 200
+    return {trips: [{
+        'trip_id': trip.trip_id,
+        'location_code': trip.location_code,
+        'schedule': trip.schedule,
+        'user_id': trip.user_id,
+        'meta_data': trip.meta_data} for trip in trips]
+        }, 200
 
 @app.route("/users/<user_id>/trip/<trip_id>", methods = ['GET', 'PATCH'])
 def trip(user_id, trip_id):

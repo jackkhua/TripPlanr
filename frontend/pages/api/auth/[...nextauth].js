@@ -60,19 +60,34 @@ export default NextAuth({
         const url = 'http://localhost:8080/users';
         const body = {
           user_name: token.email,
-          password: access_token,
+          password: account.providerAccountId,
           meta_data: '',
         };
+        console.log('TOKEN', JSON.stringify(token));
+        console.log('ACCOUNT', JSON.stringify(account));
+        console.log(JSON.stringify(body));
         const req = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body),
         });
 
-        const res = await req.json();
         if (req.status === 500) {
           console.log(`Account with email ${token.email} already exists`);
+          const url = `${process.env.SERVER_URL || 'https://localhost:8080'}/authenticate`;
+          const body = {
+            user_name: token.email,
+            password: account.providerAccountId,
+          };
+          const req = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+          });
+          const data = await req.json();
+          token.user_id = data.user_id;
         } else if (req.status === 200) {
+          const res = await req.json();
           console.log(`Account with email ${token.email} created`);
           console.log(JSON.stringify(res));
           token.user_id = res.user_id;

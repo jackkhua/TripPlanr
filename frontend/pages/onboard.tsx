@@ -137,6 +137,7 @@ const Questions: NextPage = () => {
       start_date: values.start_date,
       end_date: values.end_date,
     };
+    console.log(generate_itinerary_url);
     console.log(JSON.stringify(itinerary_body));
     const generate_itinerary_req = await fetch(generate_itinerary_url, {
       method: 'POST',
@@ -145,12 +146,19 @@ const Questions: NextPage = () => {
     });
 
     const itinerary_data = await generate_itinerary_req.json();
-    const itin_text = await generate_itinerary_req.text();
     console.log(itinerary_data);
-    console.log(itin_text);
+    const update_trip_body = {
+      schedule: itinerary_data,
+    };
+    const update_trip_url = `${process.env.SERVER_URL || 'http://localhost:8080'}/users/${user_id}/trip/${trip_id}`;
+    const trip_req = await fetch(update_trip_url, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(update_trip_body),
+    });
     alert('Your trip has been created!');
 
-    // router.push('/trips');
+    router.push('/trips');
   };
 
   if (data) {

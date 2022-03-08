@@ -15,29 +15,34 @@ const tempTrips: TripObj[] = [{ id: '1', schedule: {}, user_id: '123', meta_data
 
 const Trips: NextPage = () => {
   const { data, status } = useSession();
-  const id = data?.user?.id;
+  const [gotTrips, setGotTrips] = useState(false);
   const [trips, SetTrips] = useState<Array<TripObj> | []>([]);
   const router = useRouter();
   const navs = [{ name: 'Sign Out', path: '/api/auth/signout' }];
 
-  const getTrips = async (user_id: string) => {
+  const getTrips = async () => {
     console.log('Getting Trips');
+    console.log('user id', data.user_id);
     // SHOULD GET AN ARRAY OF TRIP OBJECTS
+    const trips_url = `${process.env.SERVER_URL || 'http://localhost:8080'}/users/${data.user_id}/trips`;
+    const req = await fetch(trips_url);
+    const trips_data = req.json();
+    console.log(JSON.stringify(trips_data));
     let trips: Array<TripObj> = [];
   };
 
   useEffect(() => {
-    if (id) {
-      getTrips(id);
+    if (status === 'authenticated') {
+      getTrips();
     }
-  }, [id]);
+  }, [status]);
   if (status === 'authenticated') {
     return (
       <div className="min-w-full items-center">
         <Header navs={navs} />
         <div className="m-8 flex-row items-center">
           <h1 className="text-3xl font-bold">Your Trips</h1>
-          <div className="flex flex-row">
+          <div className="flex grow flex-row">
             <a href="/trips/12">
               <Trip startDate="2021-12-17" endDate="2021-12-23" travelLocation="New York" activities={[]} />
             </a>

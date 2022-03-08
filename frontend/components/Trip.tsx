@@ -50,6 +50,7 @@ const CardWrapper = styled.div`
   background: linear-gradient(to right, #fc466b, #3f5efb);
   margin-top: 20px;
   width: 400px;
+  height: 600px;
 `;
 
 const CardSection = styled.div`

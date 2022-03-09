@@ -266,18 +266,18 @@ def get_trips(user_id):
     if user == None:
         return "User not found", 404
     trips = trip_data.query.filter_by(user_id = user_id).all()
-    print(trips)
     if len(trips) == 0:
-        return {
-            trips: []
-        }, 200
-    return {trips: [{
-        'trip_id': trip.trip_id,
-        'location_code': trip.location_code,
-        'schedule': trip.schedule,
-        'user_id': trip.user_id,
-        'meta_data': trip.meta_data} for trip in trips]
-        }, 200
+        return {}, 200
+    trips_dict = {}
+    for trip in trips:
+        trips_dict[trip.trip_id] = {
+            'trip_id': trip.trip_id,
+            'location_code': trip.location_code,
+            'schedule': trip.schedule,
+            'user_id': trip.user_id,
+            'meta_data': trip.meta_data
+        }
+    return trips_dict
 
 @app.route("/users/<user_id>/trip/<trip_id>", methods = ['GET', 'PATCH'])
 def trip(user_id, trip_id):

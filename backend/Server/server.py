@@ -272,9 +272,12 @@ def get_trips(user_id):
     if user == None:
         return "User not found", 404
     trips = trip_data.query.filter_by(user_id = user_id).all()
-    print(trips)
     if len(trips) == 0:
+<<<<<<< HEAD
             return {}, 200
+=======
+        return {}, 200
+>>>>>>> 3df872135436076cb37ad80a98849b0425005a4e
     trips_dict = {}
     for trip in trips:
         trips_dict[trip.trip_id] = {

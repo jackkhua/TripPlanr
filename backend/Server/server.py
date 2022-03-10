@@ -177,6 +177,7 @@ def users_generate_itinerary(user_id, location_code, trip_id):
     curr = startdate
     count = 0
     foundset = set()
+    label_set = set(trip_labels)
     for tag in trip_tags:
         tag_attractions = []
         for attraction in attractions:
@@ -184,16 +185,14 @@ def users_generate_itinerary(user_id, location_code, trip_id):
                 tag_attractions.append(attraction)
         if len(tag_attractions) == 0:
             continue
-        attractions_per_label = max_attractions_per_tag // len(trip_labels)
-        remainder = max_attractions_per_tag - len(trip_labels) * attractions_per_label
-        day_attraction_num = attractions_per_label // 2
-        if attractions_per_label % 2 == 1:
-            day_attraction_num += 1
-        for label in trip_labels:
-            tag_attractions = sorted(tag_attractions, key=lambda d: 0.0 if label not in d.labels else d.labels[label]*d.rating)
-            for i in range(day_attraction_num):
-                if tag_attractions[i].attraction_name not in foundset:
-                    result[str(curr)].append({
+        tag_attractions = sorted(tag_attractions, key=lambda d: d.rating)
+        count = 0
+        
+        for i in range(len(tag_attractions)):
+            if count == max_attractions_per_tag:
+                break
+            if not set(label_set).isdisjoint(set(tag_attractions[i].labels)) and tag_attractions[i].attraction_name not in foundset:
+                result[str(curr)].append({
                         'attraction_id': tag_attractions[i].attraction_id,
                         'attraction_name': tag_attractions[i].attraction_name,
                         'rating': tag_attractions[i].rating,
@@ -203,27 +202,12 @@ def users_generate_itinerary(user_id, location_code, trip_id):
                         'tags': tag_attractions[i].tags,
                         'img': tag_attractions[i].img,
                         'source_url': tag_attractions[i].source_url
-                    })
-                    foundset.add(tag_attractions[i].attraction_name)
+                })
+                foundset.add(tag_attractions[i].attraction_name)
                 curr = curr + timedelta(days=1)
                 if curr > enddate:
                     curr = startdate
-            for i in range(day_attraction_num, attractions_per_label):
-                if tag_attractions[i].attraction_name not in foundset:
-                    result["Other"].append({
-                        'attraction_id': tag_attractions[i].attraction_id,
-                        'attraction_name': tag_attractions[i].attraction_name,
-                        'rating': tag_attractions[i].rating,
-                        'location_code': tag_attractions[i].location_code,
-                        'country': tag_attractions[i].country,
-                        'labels': tag_attractions[i].labels,
-                        'tags': tag_attractions[i].tags,
-                        'img': tag_attractions[i].img,
-                        'source_url': tag_attractions[i].source_url
-                    })
-                    foundset.add(tag_attractions[i].attraction_name)
-
-                #count += 1
+                count += 1
     
     return json.dumps(result)
 

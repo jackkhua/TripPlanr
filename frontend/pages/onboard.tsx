@@ -98,7 +98,7 @@ const Questions: NextPage = () => {
 
   const onSubmit: SubmitHandler<OnboardingValues> = async (values) => {
     console.log('ON SUBMIT');
-    const user_id = data.user_id;
+    const user_id = data.user_id || data?.user.user_id;
     const location_url = `${process.env.SERVER_URL || 'http://localhost:8080'}/location/all`;
     const location_req = await fetch(location_url);
     const location_data = await location_req.json();

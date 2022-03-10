@@ -29,7 +29,7 @@ const TripPage: NextPage = () => {
 
   const getTripData = async () => {
     console.log('Getting trip data');
-    const trips_url = `${process.env.SERVER_URL || 'http://localhost:8080'}/users/${data.user_id}/trip/${id}`;
+    const trips_url = `${process.env.SERVER_URL || 'http://localhost:8080'}/users/${data.user_id || data?.user.user_id}/trip/${id}`;
     const trip_req = await fetch(trips_url);
     const trip_data = await trip_req.json();
     console.log(JSON.stringify(trip_data));
@@ -164,7 +164,7 @@ const TripPage: NextPage = () => {
   };
 
   const onDelete = async () => {
-    const delete_url = `${process.env.SERVER_URL || "http://localhost:8080"}/users/${data.user_id}/trip/${id}`;
+    const delete_url = `${process.env.SERVER_URL || "http://localhost:8080"}/users/${data.user_id || data?.user.user_id}/trip/${id}`;
     const req = await fetch(delete_url, {
       method: "DELETE"
     });

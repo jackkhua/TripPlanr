@@ -21,7 +21,10 @@ const Trips: NextPage = () => {
   const getTrips = async () => {
     console.log('Getting Trips');
     // SHOULD GET AN ARRAY OF TRIP OBJECTS
-    const trips_url = `${process.env.SERVER_URL || 'http://localhost:8080'}/users/${data.user_id}/trips`;
+    console.log(data);
+    const trips_url = `${process.env.SERVER_URL || 'http://localhost:8080'}/users/${
+      data.user_id || data?.user.user_id
+    }/trips`;
 
     const req = await fetch(trips_url);
 

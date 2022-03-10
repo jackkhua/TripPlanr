@@ -63,8 +63,7 @@ export default NextAuth({
           password: account.providerAccountId,
           meta_data: '',
         };
-        console.log('TOKEN', JSON.stringify(token));
-        console.log('ACCOUNT', JSON.stringify(account));
+
         console.log(JSON.stringify(body));
         const req = await fetch(url, {
           method: 'POST',
@@ -105,7 +104,6 @@ export default NextAuth({
       session.accessToken = token.accessToken;
       session.user_id = token.user_id;
       session.user = token.user;
-      console.log('SESSION', JSON.stringify(session));
       return session;
     },
   },

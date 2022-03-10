@@ -274,7 +274,7 @@ def get_trips(user_id):
         }
     return trips_dict
 
-@app.route("/users/<user_id>/trip/<trip_id>", methods = ['GET', 'PATCH'])
+@app.route("/users/<user_id>/trip/<trip_id>", methods = ['GET', 'PATCH', 'DELETE'])
 def trip(user_id, trip_id):
     user = user_information.query.filter_by(user_id = user_id).first()
     if user == None:
@@ -312,6 +312,12 @@ def trip(user_id, trip_id):
                 'user_id': trip.user_id,
                 'meta_data': trip.meta_data
             }
+    if request.method == 'DELETE':
+        trip = trip_data.query.filter_by(trip_id = trip_id).first()
+        if trip.user_id == int(user_id):
+            db.session.delete(trip)
+            db.session.commit()
+            return "Deleted", 200
     return "Error", 400
 
 @app.route("/authenticate", methods = ['POST'])

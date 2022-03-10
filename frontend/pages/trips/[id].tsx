@@ -163,12 +163,24 @@ const TripPage: NextPage = () => {
     });
   };
 
-  const onDelete = () => {};
+  const onDelete = async () => {
+    const delete_url = `${process.env.SERVER_URL || "http://localhost:8080"}/users/${data.user_id}/trip/${id}`;
+    const req = await fetch(delete_url, {
+      method: "DELETE"
+    });
+    if (req.ok) {
+      alert('Trip was successfully deleted!');
+    } else {
+      alert('There was an error while deleting your trip.');
+    }
+    router.push("/trips");
+  };
 
   const itineraryItems = schedule
     ? Object.keys(schedule).map((day) => (
-        <div className='w-1/2'>
+        <div className='w-10/12 max-w-[800px]'>
           <h1 className="text-2xl">{day}</h1>
+          <div className='border-b mb-5 mt-2 border-black '/>
           {schedule.[day].map((attraction, i) => (
             <Attraction
               name={attraction.attraction_name}
@@ -176,6 +188,8 @@ const TripPage: NextPage = () => {
               rating={attraction.rating}
               labels={Object.keys(attraction.labels)}
               tags={attraction.tags}
+              url={attraction.source_url}
+              key={i}
             />)
             )}
         </div>
@@ -183,9 +197,9 @@ const TripPage: NextPage = () => {
     : [];
   if (status === 'authenticated') {
     return (
-      <div className="min-w-full items-center">
+      <div className="min-w-full grid place-items-center">
         <Header navs={loggedInNavs} />
-        <div className="m-12 flex flex-col	bg-slate-100">
+        <div className="m-12 flex flex-col">
           <h1 className="text-3xl">Your Trip Details</h1>
           <p className="my-2 text-xl">Trip to {location}</p>
           <p className="my-2 text-xl">

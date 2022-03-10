@@ -198,7 +198,9 @@ def users_generate_itinerary(user_id, location_code, trip_id):
                     'location_code': tag_attractions[i].location_code,
                     'country': tag_attractions[i].country,
                     'labels': tag_attractions[i].labels,
-                    'tags': tag_attractions[i].tags
+                    'tags': tag_attractions[i].tags,
+                    'img': tag_attractions[i].img,
+                    'source_url': tag_attractions[i].source_url
                 })
                 curr = curr + timedelta(days=1)
                 if curr > enddate:
@@ -211,7 +213,9 @@ def users_generate_itinerary(user_id, location_code, trip_id):
                     'location_code': tag_attractions[i].location_code,
                     'country': tag_attractions[i].country,
                     'labels': tag_attractions[i].labels,
-                    'tags': tag_attractions[i].tags
+                    'tags': tag_attractions[i].tags,
+                    'img': tag_attractions[i].img,
+                    'source_url': tag_attractions[i].source_url
                 })
 
             if remainder > 0:
@@ -223,7 +227,9 @@ def users_generate_itinerary(user_id, location_code, trip_id):
                     'location_code': tag_attractions[attractions_per_label].location_code,
                     'country': tag_attractions[attractions_per_label].country,
                     'labels': tag_attractions[attractions_per_label].labels,
-                    'tags':tag_attractions[attractions_per_label].tags
+                    'tags':tag_attractions[attractions_per_label].tags,
+                    'img': tag_attractions[attractions_per_label].img,
+                    'source_url': tag_attractions[attractions_per_label].source_url
                 })
                 curr = curr + timedelta(days=1)
                 if curr > enddate:
@@ -268,16 +274,17 @@ def get_trips(user_id):
     trips = trip_data.query.filter_by(user_id = user_id).all()
     print(trips)
     if len(trips) == 0:
-        return {
-            trips: []
-        }, 200
-    return {trips: [{
-        'trip_id': trip.trip_id,
-        'location_code': trip.location_code,
-        'schedule': trip.schedule,
-        'user_id': trip.user_id,
-        'meta_data': trip.meta_data} for trip in trips]
-        }, 200
+            return {}, 200
+    trips_dict = {}
+    for trip in trips:
+        trips_dict[trip.trip_id] = {
+            'trip_id': trip.trip_id,
+            'location_code': trip.location_code,
+            'schedule': trip.schedule,
+            'user_id': trip.user_id,
+            'meta_data': trip.meta_data
+        }
+    return trips_dict
 
 @app.route("/users/<user_id>/trip/<trip_id>", methods = ['GET', 'PATCH'])
 def trip(user_id, trip_id):
@@ -306,6 +313,8 @@ def trip(user_id, trip_id):
                 trip.schedule = request.json['schedule']
             if 'meta_data' in request.json:
                 trip.meta_data = request.json['meta_data']
+            if 'location_code' in request.json:
+                trip.location_code = request.json['location_code']
             db.session.merge(trip)
             db.session.commit()
             return {

@@ -1,21 +1,16 @@
 import React from 'react';
 import styled from 'styled-components';
 
-type Activity = {
-  name: string;
-  imageSrc: string;
-};
-
 type TripProps = {
   startDate: string;
   endDate: string;
   travelLocation: string;
-  activities: Activity[];
+  image: string;
 };
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-const Trip: React.FC<TripProps> = ({ ...props }) => {
+const Trip: React.FC<TripProps> = React.forwardRef(({ ...props }, ref) => {
   const formatDate = (dateString: string) => {
     // Format yyyy-mm-dd
     const year = Number(dateString.slice(0, 4));
@@ -27,18 +22,20 @@ const Trip: React.FC<TripProps> = ({ ...props }) => {
   return (
     <CardWrapper>
       <CardSection>
-        <b>Trip to {props.travelLocation}: </b>
-        {formatDate(props.startDate)} - {formatDate(props.endDate)}
+        <b>Trip to {props.travelLocation} </b>
       </CardSection>
       <CardLine />
       <CardSection>
-        <b>Activities</b>
-        {/* TODO: add carousel for multiple activities */}
-        <CardImg />
+        {formatDate(props.startDate)} - {formatDate(props.endDate)}
+      </CardSection>
+      <CardLine />
+
+      <CardSection>
+        <CardImg src={props.image} />
       </CardSection>
     </CardWrapper>
   );
-};
+});
 
 export default Trip;
 
@@ -49,8 +46,8 @@ const CardWrapper = styled.div`
   color: white;
   background: linear-gradient(to right, #fc466b, #3f5efb);
   margin-top: 20px;
-  width: 400px;
-  height: 600px;
+  width: 300px;
+  height: 400px;
 `;
 
 const CardSection = styled.div`
@@ -58,7 +55,7 @@ const CardSection = styled.div`
 `;
 
 const CardImg = styled.img`
-  margin-top: 16px;
+  margin-top: 50px;
   background: #fff;
   border-radius: 8px;
   height: 160px;

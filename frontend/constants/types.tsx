@@ -37,8 +37,13 @@ export type Restaurant = {
 };
 
 export type TripObj = {
-  id: string;
+  trip_id: string;
+  location_code: number;
+  location: string;
   schedule: Object;
   user_id: string;
   meta_data: Object;
+  start_date: string;
+  end_date: string;
+  image: string;
 };

@@ -1,5 +1,5 @@
 import { NextPage } from 'next';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSession, signIn, signOut } from 'next-auth/react';
 import Button from '../components/Button';
 import { FormProvider, SubmitHandler, useForm, Controller } from 'react-hook-form';
@@ -7,13 +7,12 @@ import Input from '../components/Input';
 import Select from 'react-select';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import styled from 'styled-components';
 import { navs, loggedInNavs } from '../constants/header';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
 const travel_locations = [
-  { value: 'New York City', label: 'New York' },
+  { value: 'New York City', label: 'New York City' },
   { value: 'Seoul', label: 'Seoul' },
   { value: 'London', label: 'London' },
   { value: 'Singapore', label: 'Singapore' },
@@ -26,13 +25,13 @@ const travel_options = [
 const attraction_options = [
   { value: 'indoor', label: 'Indoors' },
   { value: 'outdoor', label: 'Outdoors' },
-  { value: 'no_preference', label: 'No Preference' },
+  { value: 'indoor_outdoor', label: 'No Preference' },
 ];
 
 const event_options = [
   { value: 'active', label: 'Active' },
   { value: 'relaxing', label: 'Relaxing' },
-  { value: 'no_preference', label: 'No Preference' },
+  { value: 'active_relaxing', label: 'No Preference' },
 ];
 
 const budget_options = [
@@ -79,16 +78,28 @@ type OnboardingValues = {
 const Questions: NextPage = () => {
   const { data } = useSession();
   const router = useRouter();
-  const { update_id } = router.query;
+  const {
+    update_id,
+    location,
+    start_date,
+    end_date,
+    travel_option,
+    attraction_option,
+    event_option,
+    budget,
+    local,
+    attractions,
+  } = router.query;
   const [startedFlow, setStartedFlow] = useState(false);
 
   const formMethods = useForm<OnboardingValues>();
+
   const formErrors = formMethods.formState.errors;
 
   const onSubmit: SubmitHandler<OnboardingValues> = async (values) => {
+    console.log('ON SUBMIT');
     const user_id = data.user_id;
     const location_url = `${process.env.SERVER_URL || 'http://localhost:8080'}/location/all`;
-    console.log(location_url);
     const location_req = await fetch(location_url);
     const location_data = await location_req.json();
 
@@ -108,10 +119,9 @@ const Questions: NextPage = () => {
       meta_data: meta_data,
       location_code: location_code,
     };
-    console.log('BODY', JSON.stringify(body));
     let trip_resp;
     if (update_id) {
-      const update_trip_url = `${process.env.SERVER_URL || 'http://localhost:8080'}/users/${user_id}/trip/${trip_id}`;
+      const update_trip_url = `${process.env.SERVER_URL || 'http://localhost:8080'}/users/${user_id}/trip/${update_id}`;
       const trip_req = await fetch(update_trip_url, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -156,13 +166,42 @@ const Questions: NextPage = () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(update_trip_body),
     });
-    alert('Your trip has been created!');
-
-    router.push('/trips');
+    if (trip_req.ok) {
+      alert('Your trip has been created/updated!');
+      router.push('/trips');
+    } else {
+      alert('An error occured when creating/updating your trip');
+    }
   };
+  useEffect(() => {
+    if (location) {
+      formMethods.setValue('travel_location', location, { shouldValidate: true, shouldDirty: true });
+    }
+    if (start_date) {
+      formMethods.setValue('start_date', start_date, { shouldValidate: true, shouldDirty: true });
+    }
+    if (end_date) {
+      formMethods.setValue('end_date', end_date, { shouldValidate: true, shouldDirty: true });
+    }
+    if (travel_option) {
+      formMethods.setValue('travel_option', travel_option, { shouldValidate: true, shouldDirty: true });
+    }
+    if (attraction_option) {
+      formMethods.setValue('attraction_option', attraction_option, { shouldValidate: true, shouldDirty: true });
+    }
+    if (event_option) {
+      formMethods.setValue('event_option', event_option, { shouldValidate: true, shouldDirty: true });
+    }
+    if (budget) {
+      formMethods.setValue('budget_option', budget, { shouldValidate: true, shouldDirty: true });
+    }
+    if (local) {
+      formMethods.setValue('local_option', local, { shouldValidate: true, shouldDirty: true });
+    }
+  }, []);
 
   if (data) {
-    if (!startedFlow) {
+    if (!startedFlow && !update_id) {
       return (
         <>
           <div className="h-[85vh] w-screen flex-col">
@@ -192,6 +231,7 @@ const Questions: NextPage = () => {
                   <Controller
                     control={formMethods.control}
                     name="travel_location"
+                    key="travel_location"
                     rules={{
                       required: {
                         value: true,
@@ -217,6 +257,7 @@ const Questions: NextPage = () => {
                     type="date"
                     formFieldName="start_date"
                     autoComplete="off"
+                    key="start_date"
                     errorState={Boolean(formErrors.start_date)}
                     formRegisterOptions={{
                       required: {
@@ -224,13 +265,13 @@ const Questions: NextPage = () => {
                         message: 'Please enter a start date.',
                       },
                     }}
-                    {...formMethods.register('start_date')}
                   />
                   <label>What date will you be ending your trip?</label>
                   <Input
                     type="date"
                     formFieldName="end_date"
                     autoComplete="off"
+                    key="end_date"
                     errorState={Boolean(formErrors.end_date)}
                     formRegisterOptions={{
                       required: {
@@ -238,12 +279,12 @@ const Questions: NextPage = () => {
                         message: 'Please enter an end date.',
                       },
                     }}
-                    {...formMethods.register('end_date')}
                   />
                   <label>How will you be travelling this trip?</label>
                   <Controller
                     control={formMethods.control}
                     name="travel_option"
+                    key="travel_option"
                     rules={{
                       required: {
                         value: true,
@@ -268,6 +309,7 @@ const Questions: NextPage = () => {
                   <Controller
                     control={formMethods.control}
                     name="attraction_option"
+                    key="attraction_option"
                     rules={{
                       required: {
                         value: true,
@@ -292,6 +334,7 @@ const Questions: NextPage = () => {
                   <Controller
                     control={formMethods.control}
                     name="event_option"
+                    key="event_option"
                     rules={{
                       required: {
                         value: true,
@@ -316,6 +359,7 @@ const Questions: NextPage = () => {
                   <Controller
                     control={formMethods.control}
                     name="budget_option"
+                    key="budget_option"
                     rules={{
                       required: {
                         value: true,
@@ -340,6 +384,7 @@ const Questions: NextPage = () => {
                   <Controller
                     control={formMethods.control}
                     name="local_option"
+                    key="local_option"
                     rules={{
                       required: {
                         value: true,
@@ -364,6 +409,7 @@ const Questions: NextPage = () => {
                   <Controller
                     control={formMethods.control}
                     name="activity_options"
+                    key="activity_options"
                     rules={{
                       required: {
                         value: true,
@@ -386,7 +432,7 @@ const Questions: NextPage = () => {
                     )}
                   />
                   <div className="grid place-items-center">
-                    <Button buttonText="Submit" />
+                    <Button buttonText="Submit" type="submit" onClick={() => formMethods.handleSubmit(onSubmit)} />
                   </div>
                 </div>
               </form>

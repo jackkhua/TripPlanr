@@ -22,11 +22,13 @@ Run py load_geographic_data.py
 
 Run py load_attractions.py
 
-Run py_load_attraction_imgs.py
+Run py load_attraction_imgs.py
 
-Run py_load_attraction_tags.py
+Run py load_attraction_tags.py
 
-Run py_load_attraction_urls.py
+Run py load_attraction_urls.py
+
+Run py load_attraction_labels.py
 
 Step 3:
 
